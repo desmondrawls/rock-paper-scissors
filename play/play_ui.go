@@ -22,7 +22,23 @@ type Inputs struct {
 func Play(playerThrows Inputs, ui UI) {
     if playerThrows.Player1Throw == playerThrows.Player2Throw {
         ui.Draw()
-    } else {
-        ui.Winner("desmond")
+        return
     }
+    if beats(playerThrows.Player1Throw, playerThrows.Player2Throw) {
+        ui.Winner(playerThrows.Player1Name)
+        return
+    }
+    ui.Winner(playerThrows.Player2Name)
+}
+
+func beats(a, b Throw) bool {
+    switch a {
+    case ROCK:
+        return b == SCISSORS
+    case PAPER:
+        return b == ROCK
+    case SCISSORS:
+        return b == PAPER
+    }
+    return false
 }
