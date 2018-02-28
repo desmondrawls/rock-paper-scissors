@@ -1,26 +1,16 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "os"
-
+    console_ui "github.com/desmondrawls/rock-paper-scissors/console_ui"
     play "github.com/desmondrawls/rock-paper-scissors/play"
 )
 
 func main() {
-    args := os.Args
-    throws := map[string]string{args[1]: args[2],
-        args[3]: args[4]}
-    winFinder := &play.WinFinder{
-        Comparer: play.Compare,
+    throws := play.Inputs{
+        Player1Name:  "gabe",
+        Player2Name:  "player2-name",
+        Player1Throw: play.PAPER,
+        Player2Throw: play.ROCK,
     }
-    result, err := winFinder.GetWinner(throws)
-    if err != nil {
-        log.Fatal(err)
-    }
-    if result.IsDraw() {
-        fmt.Printf("ITS A DRAW\n")
-    }
-    fmt.Printf("WINNER: %s\n", result.Winner)
+    play.Play(throws, &console_ui.UI{})
 }
