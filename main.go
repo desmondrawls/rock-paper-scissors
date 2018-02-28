@@ -1,16 +1,13 @@
 package main
 
 import (
-    console_ui "github.com/desmondrawls/rock-paper-scissors/console_ui"
-    play "github.com/desmondrawls/rock-paper-scissors/play"
+    "log"
+    "net/http"
+
+    "github.com/desmondrawls/rock-paper-scissors/web_ui"
 )
 
 func main() {
-    throws := play.Inputs{
-        Player1Name:  "gabe",
-        Player2Name:  "player2-name",
-        Player1Throw: play.PAPER,
-        Player2Throw: play.ROCK,
-    }
-    play.Play(throws, &console_ui.UI{})
+    handler := &web_ui.Handler{}
+    log.Fatal(http.ListenAndServe("127.0.0.1:8080", handler))
 }
