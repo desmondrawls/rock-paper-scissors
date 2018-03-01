@@ -33,14 +33,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         }
         play.Play(throws, &web_ui{
             ResponseWriter: w,
-            request:        r,
         })
     }
 }
 
 type web_ui struct {
     http.ResponseWriter
-    request *http.Request
 }
 
 func (w web_ui) Winner(name string) {
@@ -51,7 +49,7 @@ func (w web_ui) Draw() {
     w.Write([]byte("TIE!"))
 }
 
-func (w web_ui) Invalid() {
+func (w web_ui) Invalid(throws play.Inputs) {
     w.Write([]byte(fmt.Sprintf(`<body>
         <h1>Invalid input</h1>
         <form action="/play" method="POST">
@@ -63,5 +61,5 @@ func (w web_ui) Invalid() {
         <br>
         <input type="submit" value="Play" />
         </form>
-        </body>`, w.request.FormValue("player1"), w.request.FormValue("player2"))))
+        </body>`, throws.Player1Throw, throws.Player2Throw)))
 }

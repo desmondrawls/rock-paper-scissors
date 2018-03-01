@@ -8,7 +8,7 @@ import (
 type UI interface {
     Winner(string)
     Draw()
-    Invalid()
+    Invalid(Inputs)
 }
 
 type Throw int
@@ -27,12 +27,12 @@ type Inputs struct {
 func Play(playerThrows Inputs, ui UI) {
     player1Throw, ok := parseThrow(playerThrows.Player1Throw)
     if !ok {
-        ui.Invalid()
+        ui.Invalid(playerThrows)
         return
     }
     player2Throw, ok := parseThrow(playerThrows.Player2Throw)
     if !ok {
-        ui.Invalid()
+        ui.Invalid(playerThrows)
         return
     }
     if player1Throw == player2Throw {

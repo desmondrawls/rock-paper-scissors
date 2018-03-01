@@ -16,11 +16,13 @@ type UISpy struct {
 	DrawStub           func()
 	drawMutex          sync.RWMutex
 	drawArgsForCall    []struct{}
-	InvalidStub        func()
+	InvalidStub        func(play.Inputs)
 	invalidMutex       sync.RWMutex
-	invalidArgsForCall []struct{}
-	invocations        map[string][][]interface{}
-	invocationsMutex   sync.RWMutex
+	invalidArgsForCall []struct {
+		arg1 play.Inputs
+	}
+	invocations      map[string][][]interface{}
+	invocationsMutex sync.RWMutex
 }
 
 func (fake *UISpy) Winner(arg1 string) {
@@ -63,13 +65,15 @@ func (fake *UISpy) DrawCallCount() int {
 	return len(fake.drawArgsForCall)
 }
 
-func (fake *UISpy) Invalid() {
+func (fake *UISpy) Invalid(arg1 play.Inputs) {
 	fake.invalidMutex.Lock()
-	fake.invalidArgsForCall = append(fake.invalidArgsForCall, struct{}{})
-	fake.recordInvocation("Invalid", []interface{}{})
+	fake.invalidArgsForCall = append(fake.invalidArgsForCall, struct {
+		arg1 play.Inputs
+	}{arg1})
+	fake.recordInvocation("Invalid", []interface{}{arg1})
 	fake.invalidMutex.Unlock()
 	if fake.InvalidStub != nil {
-		fake.InvalidStub()
+		fake.InvalidStub(arg1)
 	}
 }
 
@@ -77,6 +81,12 @@ func (fake *UISpy) InvalidCallCount() int {
 	fake.invalidMutex.RLock()
 	defer fake.invalidMutex.RUnlock()
 	return len(fake.invalidArgsForCall)
+}
+
+func (fake *UISpy) InvalidArgsForCall(i int) play.Inputs {
+	fake.invalidMutex.RLock()
+	defer fake.invalidMutex.RUnlock()
+	return fake.invalidArgsForCall[i].arg1
 }
 
 func (fake *UISpy) Invocations() map[string][][]interface{} {

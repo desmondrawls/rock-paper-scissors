@@ -21,6 +21,7 @@ var _ = Describe("GameUseCase", func() {
         play.Play(throws, uiSpy)
 
         Expect(uiSpy.InvalidCallCount()).To(Equal(1))
+        Expect(uiSpy.InvalidArgsForCall(0)).To(Equal(throws))
         Expect(uiSpy.DrawCallCount()).To(Equal(0))
         Expect(uiSpy.WinnerCallCount()).To(Equal(0))
     })
