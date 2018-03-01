@@ -1,9 +1,14 @@
 package play
 
+import (
+    "strings"
+)
+
 //go:generate counterfeiter --fake-name UISpy . UI
 type UI interface {
     Winner(string)
     Draw()
+    Invalid()
 }
 
 type Throw int
@@ -16,15 +21,25 @@ const (
 
 type Inputs struct {
     Player1Name, Player2Name   string
-    Player1Throw, Player2Throw Throw
+    Player1Throw, Player2Throw string
 }
 
 func Play(playerThrows Inputs, ui UI) {
-    if playerThrows.Player1Throw == playerThrows.Player2Throw {
+    player1Throw, ok := parseThrow(playerThrows.Player1Throw)
+    if !ok {
+        ui.Invalid()
+        return
+    }
+    player2Throw, ok := parseThrow(playerThrows.Player2Throw)
+    if !ok {
+        ui.Invalid()
+        return
+    }
+    if player1Throw == player2Throw {
         ui.Draw()
         return
     }
-    if beats(playerThrows.Player1Throw, playerThrows.Player2Throw) {
+    if beats(player1Throw, player2Throw) {
         ui.Winner(playerThrows.Player1Name)
         return
     }
@@ -41,4 +56,16 @@ func beats(a, b Throw) bool {
         return b == PAPER
     }
     return false
+}
+
+func parseThrow(input string) (Throw, bool) {
+    switch strings.ToLower(input) {
+    case "rock":
+        return ROCK, true
+    case "paper":
+        return PAPER, true
+    case "scissors":
+        return SCISSORS, true
+    }
+    return 0, false
 }

@@ -13,11 +13,14 @@ type UISpy struct {
 	winnerArgsForCall []struct {
 		arg1 string
 	}
-	DrawStub         func()
-	drawMutex        sync.RWMutex
-	drawArgsForCall  []struct{}
-	invocations      map[string][][]interface{}
-	invocationsMutex sync.RWMutex
+	DrawStub           func()
+	drawMutex          sync.RWMutex
+	drawArgsForCall    []struct{}
+	InvalidStub        func()
+	invalidMutex       sync.RWMutex
+	invalidArgsForCall []struct{}
+	invocations        map[string][][]interface{}
+	invocationsMutex   sync.RWMutex
 }
 
 func (fake *UISpy) Winner(arg1 string) {
@@ -60,6 +63,22 @@ func (fake *UISpy) DrawCallCount() int {
 	return len(fake.drawArgsForCall)
 }
 
+func (fake *UISpy) Invalid() {
+	fake.invalidMutex.Lock()
+	fake.invalidArgsForCall = append(fake.invalidArgsForCall, struct{}{})
+	fake.recordInvocation("Invalid", []interface{}{})
+	fake.invalidMutex.Unlock()
+	if fake.InvalidStub != nil {
+		fake.InvalidStub()
+	}
+}
+
+func (fake *UISpy) InvalidCallCount() int {
+	fake.invalidMutex.RLock()
+	defer fake.invalidMutex.RUnlock()
+	return len(fake.invalidArgsForCall)
+}
+
 func (fake *UISpy) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -67,6 +86,8 @@ func (fake *UISpy) Invocations() map[string][][]interface{} {
 	defer fake.winnerMutex.RUnlock()
 	fake.drawMutex.RLock()
 	defer fake.drawMutex.RUnlock()
+	fake.invalidMutex.RLock()
+	defer fake.invalidMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
