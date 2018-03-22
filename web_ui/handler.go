@@ -1,14 +1,14 @@
 package web_ui
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"net/http"
 
-    "github.com/desmondrawls/rock-paper-scissors/play"
+	"github.com/desmondrawls/rock-paper-scissors/play"
 )
 
 const (
-    HomePageText = `<body>
+	HomePageText = `<body>
         <form action="/play" method="POST">
         <label for:"player1">P1</label>
         <input name="player1" type="string"/>
@@ -20,7 +20,7 @@ const (
         </form>
         </body>`
 
-    InvalidInputPageTemplate = `<body>
+	InvalidInputPageTemplate = `<body>
         <h1>Invalid input</h1>
         <form action="/play" method="POST">
         <label for:"player1">P1</label>
@@ -37,35 +37,35 @@ const (
 type Handler struct{}
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    if r.URL.Path == "/" {
-        w.Write([]byte(HomePageText))
-        return
-    }
-    if r.URL.Path == "/play" && r.Method == "POST" {
-        throws := play.Inputs{
-            Player1Name:  "player1",
-            Player2Name:  "player2",
-            Player1Throw: r.FormValue("player1"),
-            Player2Throw: r.FormValue("player2"),
-        }
-        play.Play(throws, &web_ui{
-            ResponseWriter: w,
-        })
-    }
+	if r.URL.Path == "/" {
+		w.Write([]byte(HomePageText))
+		return
+	}
+	if r.URL.Path == "/play" && r.Method == "POST" {
+		throws := play.Inputs{
+			Player1Name:  "player1",
+			Player2Name:  "player2",
+			Player1Throw: r.FormValue("player1"),
+			Player2Throw: r.FormValue("player2"),
+		}
+		play.Play(throws, &web_ui{
+			ResponseWriter: w,
+		})
+	}
 }
 
 type web_ui struct {
-    http.ResponseWriter
+	http.ResponseWriter
 }
 
 func (w web_ui) Winner(name string) {
-    w.Write([]byte(fmt.Sprintf("<body>%s <br> WINS!</body>", name)))
+	w.Write([]byte(fmt.Sprintf("<body>%s <br> WINS!</body>", name)))
 }
 
 func (w web_ui) Draw() {
-    w.Write([]byte("TIE!"))
+	w.Write([]byte("TIE!"))
 }
 
 func (w web_ui) Invalid(throws play.Inputs) {
-    w.Write([]byte(fmt.Sprintf(InvalidInputPageTemplate, throws.Player1Throw, throws.Player2Throw)))
+	w.Write([]byte(fmt.Sprintf(InvalidInputPageTemplate, throws.Player1Throw, throws.Player2Throw)))
 }
