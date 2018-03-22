@@ -7,11 +7,8 @@ import (
     "github.com/desmondrawls/rock-paper-scissors/play"
 )
 
-type Handler struct{}
-
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    if r.URL.Path == "/" {
-        w.Write([]byte(`<body>
+const (
+    HomePageText = `<body>
         <form action="/play" method="POST">
         <label for:"player1">P1</label>
         <input name="player1" type="string"/>
@@ -21,7 +18,27 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         <br>
         <input type="submit" value="Play" />
         </form>
-        </body>`))
+        </body>`
+
+    InvalidInputPageTemplate = `<body>
+        <h1>Invalid input</h1>
+        <form action="/play" method="POST">
+        <label for:"player1">P1</label>
+        <input name="player1" type="string" value=%q/>
+        <br>
+        <label for:"player2">P2</label>
+        <input name="player2" type="string" value=%q/>
+        <br>
+        <input type="submit" value="Play" />
+        </form>
+        </body>`
+)
+
+type Handler struct{}
+
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    if r.URL.Path == "/" {
+        w.Write([]byte(HomePageText))
         return
     }
     if r.URL.Path == "/play" && r.Method == "POST" {
@@ -50,16 +67,5 @@ func (w web_ui) Draw() {
 }
 
 func (w web_ui) Invalid(throws play.Inputs) {
-    w.Write([]byte(fmt.Sprintf(`<body>
-        <h1>Invalid input</h1>
-        <form action="/play" method="POST">
-        <label for:"player1">P1</label>
-        <input name="player1" type="string" value=%q/>
-        <br>
-        <label for:"player2">P2</label>
-        <input name="player2" type="string" value=%q/>
-        <br>
-        <input type="submit" value="Play" />
-        </form>
-        </body>`, throws.Player1Throw, throws.Player2Throw)))
+    w.Write([]byte(fmt.Sprintf(InvalidInputPageTemplate, throws.Player1Throw, throws.Player2Throw)))
 }
