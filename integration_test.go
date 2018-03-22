@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"fmt"
+	"net/http"
 	"os/exec"
 
 	. "github.com/onsi/ginkgo"
@@ -15,17 +16,29 @@ var _ = Describe("Integration", func() {
 	var (
 		page          *agouti.Page
 		serverSession *gexec.Session
-		serverPort    string
+		baseURL       string
 	)
+
+	getHTTPStatus := func() (int, error) {
+		resp, err := http.Get(baseURL)
+		if err != nil {
+			return 0, err
+		}
+		defer resp.Body.Close()
+		return resp.StatusCode, nil
+	}
 
 	BeforeEach(func() {
 		var err error
 		page, err = agoutiDriver.NewPage()
 		Expect(err).NotTo(HaveOccurred())
 
-		serverPort = fmt.Sprintf("%d", PickAPort())
+		serverPort := fmt.Sprintf("%d", PickAPort())
 		serverCmd := exec.Command(pathToServer, "--port", serverPort)
 		serverSession, err = gexec.Start(serverCmd, GinkgoWriter, GinkgoWriter)
+		Expect(err).NotTo(HaveOccurred())
+		baseURL = fmt.Sprintf("http://127.0.0.1:%s", serverPort)
+		Eventually(getHTTPStatus).Should(Equal(http.StatusOK))
 	})
 
 	AfterEach(func() {
@@ -34,7 +47,7 @@ var _ = Describe("Integration", func() {
 	})
 
 	assertJourney := func(player1, player2 string, expectedResult string) {
-		Expect(page.Navigate(fmt.Sprintf("http://localhost:%s", serverPort))).To(Succeed())
+		Expect(page.Navigate(baseURL)).To(Succeed())
 		Eventually(page.FindByName("player1")).Should(BeFound())
 
 		By("allowing the user to fill out a game and submit it")
@@ -44,7 +57,6 @@ var _ = Describe("Integration", func() {
 
 		By("showing the game result")
 		Eventually(page.HTML).Should(MatchRegexp(expectedResult))
-
 	}
 
 	It("should play a normal game", func() {
@@ -52,7 +64,6 @@ var _ = Describe("Integration", func() {
 	})
 
 	It("should validate input", func() {
-		assertJourney("rock", "scissors", "player1 .* WINS")
-		//assertJourney("rock", "sailbot", "Invalid input")
+		assertJourney("rock", "sailboat", "Invalid input")
 	})
 })

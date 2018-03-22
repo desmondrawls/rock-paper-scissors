@@ -13,25 +13,27 @@ import (
 
 func TestRockPaperScissors(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "RockPaperScissors Suite")
+	RunSpecs(t, "Integration Suite")
 }
 
 var agoutiDriver *agouti.WebDriver
 var pathToServer string
 
-var _ = BeforeSuite(func() {
+var _ = SynchronizedBeforeSuite(func() []byte {
+	pathToServer, err := gexec.Build("github.com/desmondrawls/rock-paper-scissors")
+	Expect(err).NotTo(HaveOccurred())
+	return []byte(pathToServer)
+}, func(data []byte) {
+	pathToServer = string(data)
+
 	agoutiDriver = agouti.PhantomJS()
 	Expect(agoutiDriver.Start()).To(Succeed())
-
-	var err error
-	pathToServer, err = gexec.Build("github.com/desmondrawls/rock-paper-scissors")
-	Expect(err).NotTo(HaveOccurred())
 })
 
-var _ = AfterSuite(func() {
+var _ = SynchronizedAfterSuite(func() {
 	Expect(agoutiDriver.Stop()).To(Succeed())
 	gexec.CleanupBuildArtifacts()
-})
+}, func() {})
 
 var (
 	lastPortUsed int
