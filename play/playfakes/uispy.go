@@ -4,6 +4,7 @@ package playfakes
 import (
 	"sync"
 
+	"github.com/desmondrawls/rock-paper-scissors/models"
 	"github.com/desmondrawls/rock-paper-scissors/play"
 )
 
@@ -16,10 +17,10 @@ type UISpy struct {
 	DrawStub           func()
 	drawMutex          sync.RWMutex
 	drawArgsForCall    []struct{}
-	InvalidStub        func(play.Inputs)
+	InvalidStub        func(models.Inputs)
 	invalidMutex       sync.RWMutex
 	invalidArgsForCall []struct {
-		arg1 play.Inputs
+		arg1 models.Inputs
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -65,10 +66,10 @@ func (fake *UISpy) DrawCallCount() int {
 	return len(fake.drawArgsForCall)
 }
 
-func (fake *UISpy) Invalid(arg1 play.Inputs) {
+func (fake *UISpy) Invalid(arg1 models.Inputs) {
 	fake.invalidMutex.Lock()
 	fake.invalidArgsForCall = append(fake.invalidArgsForCall, struct {
-		arg1 play.Inputs
+		arg1 models.Inputs
 	}{arg1})
 	fake.recordInvocation("Invalid", []interface{}{arg1})
 	fake.invalidMutex.Unlock()
@@ -83,7 +84,7 @@ func (fake *UISpy) InvalidCallCount() int {
 	return len(fake.invalidArgsForCall)
 }
 
-func (fake *UISpy) InvalidArgsForCall(i int) play.Inputs {
+func (fake *UISpy) InvalidArgsForCall(i int) models.Inputs {
 	fake.invalidMutex.RLock()
 	defer fake.invalidMutex.RUnlock()
 	return fake.invalidArgsForCall[i].arg1
